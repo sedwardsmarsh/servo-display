@@ -13,12 +13,11 @@ img.onload = function () {
     let color_sum = imgData.data[i] + imgData.data[i + 1] + imgData.data[i + 2];
 
     // quantize the color value into 5 states
-    let gray_shade = 0;
-    if (color_sum < 153) gray_shade = 51;
-    else if (color_sum < 153 * 2) gray_shade = 51 * 2;
-    else if (color_sum < 153 * 3) gray_shade = 51 * 3;
-    else if (color_sum < 153 * 4) gray_shade = 51 * 4;
-    else gray_shade = 51 * 5;
+    // TODO: make sure these values are in [0,255]
+    const num_shades = 3;
+    const bin_width = (255 * 3) / num_shades;
+    const shade_width = 255 / num_shades;
+    let gray_shade = Math.ceil(color_sum / bin_width) * shade_width;
 
     imgData.data[i] = gray_shade;
     imgData.data[i + 1] = gray_shade;
