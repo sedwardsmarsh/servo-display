@@ -1,10 +1,91 @@
+<!DOCTYPE html>
 <html>
-    <head>
-        <link href="style.css">
-    </head>
-    <body>
-        <img src="https://cdn.hashnode.com/res/hashnode/image/upload/v1600097347472/FaJTB7UrN.jpeg" id="eeveelutions" />
-        <canvas id="canvas" width="200" height="200"></canvas>
-        <script src="script.js"></script>
-    </body>
+<head>
+    <title>Image Downsizer</title>
+    <!-- Include necessary CSS files for Croppie -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/croppie/2.6.5/croppie.min.css">
+</head>
+<body>
+    <h1>Image Downsizer</h1>
+    <div>
+        <input type="file" id="uploadImage">
+        <div id="imagePreview"></div>
+    </div>
+    <div id="downsizedPreview">
+        <h2>Downsized Image (8x8)</h2>
+        <canvas id="canvas" width="8" height="8" style="border: 1px solid black;"></canvas>
+    </div>
+    <div id="upscaledPreview" style="display: none;">
+        <h2>Upscaled Image (300x300)</h2>
+        <canvas id="upscaledCanvas" width="300" height="300" style="border: 1px solid black;"></canvas>
+    </div>
+    <button onclick="downsizeImage()">Downsize to 8x8</button>
+
+    <!-- Include necessary JS files for Croppie -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/croppie/2.6.5/croppie.min.js"></script>
+    <script>
+        let croppieInstance;
+
+        function initializeCroppie() {
+            const imagePreview = document.getElementById('imagePreview');
+            const uploadImage = document.getElementById('uploadImage');
+
+            // Initialize Croppie
+            croppieInstance = new Croppie(imagePreview, {
+                viewport: { width: 200, height: 200 },
+                boundary: { width: 250, height: 250 }
+            });
+
+            // Handle image upload
+            uploadImage.addEventListener('change', function (e) {
+                const file = e.target.files[0];
+                const reader = new FileReader();
+
+                reader.onload = function (event) {
+                    croppieInstance.bind({
+                        url: event.target.result
+                    });
+                };
+
+                reader.readAsDataURL(file);
+            });
+        }
+
+        function downsizeImage() {
+            croppieInstance.result('canvas', 'original').then(function (img) {
+                const canvas = document.getElementById('canvas');
+                const ctx = canvas.getContext('2d');
+                const imgElement = new Image();
+
+                imgElement.onload = function () {
+                    // Draw the image on the canvas with 8x8 dimensions
+                    ctx.drawImage(imgElement, 0, 0, 8, 8);
+
+                    // Trigger upscaling automatically
+                    upscaleImage();
+                };
+
+                imgElement.src = img;
+                canvas.style.display = 'block';
+                document.getElementById('upscaledPreview').style.display = 'none';
+            });
+        }
+
+        function upscaleImage() {
+            const canvas = document.getElementById('canvas');
+            const ctx = canvas.getContext('2d');
+            const imageData = ctx.getImageData(0, 0, 8, 8);
+
+            const upscaledCanvas = document.getElementById('upscaledCanvas');
+            const upscaledCtx = upscaledCanvas.getContext('2d');
+            upscaledCtx.putImageData(imageData, 0, 0);
+            upscaledCtx.imageSmoothingEnabled = false;
+            upscaledCtx.drawImage(upscaledCanvas, 0, 0, 8, 8, 0, 0, 300, 300);
+            document.getElementById('upscaledPreview').style.display = 'block';
+        }
+
+        // Initialize Croppie when the page is loaded
+        window.onload = initializeCroppie;
+    </script>
+</body>
 </html>
