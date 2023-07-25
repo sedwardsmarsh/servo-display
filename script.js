@@ -1,28 +1,45 @@
-const img = document.getElementById("eeveelutions");
-const canvas = document.getElementById("canvas");
-const ctx = canvas.getContext("2d");
+function update_filters() {
+  // Get slider values
+  const hue = document.getElementById("hueRange").value + "deg";
+  const saturation = document.getElementById("saturationRange").value + "%";
+  const brightness = document.getElementById("brightnessRange").value + "%";
+  const contrast = document.getElementById("contrastRange").value + "%";
 
-img.onload = function () {
-  img.crossOrigin = "anonymous";
-  ctx.drawImage(img, 0, 0);
-  const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+  dispatchUpdateFiltersEvent(hue, saturation, brightness, contrast);
+}
 
-  // convert pixel data into grayscale
-  for (i = 0; i < imgData.data.length; i += 4) {
-    
-    let color_sum = imgData.data[i] + imgData.data[i + 1] + imgData.data[i + 2];
+function dispatchUpdateFiltersEvent(hue, saturation, brightness, contrast) {
+  // construct an update filters event
+  const updateFilters = new CustomEvent("updateFilters", {
+    detail: {
+      hue: hue,
+      saturation: saturation,
+      brightness: brightness,
+      contrast: contrast,
+    },
+  });
 
-    // quantize the color value into 5 states
-    // TODO: make sure these values are in [0,255]
-    const num_shades = 3;
-    const bin_width = (255 * 3) / num_shades;
-    const shade_width = 255 / num_shades;
-    let gray_shade = Math.ceil(color_sum / bin_width) * shade_width;
+  // Dispatch the custom event with updated values when a slider changes
+  let el = document.getElementById("hueRange");
+  el.dispatchEvent(updateFilters);
+}
 
-    imgData.data[i] = gray_shade;
-    imgData.data[i + 1] = gray_shade;
-    imgData.data[i + 2] = gray_shade;
-    imgData.data[i + 3] = 255;
-  }
-  ctx.putImageData(imgData, 0, 0);
-};
+// update css #slider values on an updateFilters event
+let root = document.documentElement;
+let img = document.getElementById("myImg")
+var tableElements = document.querySelectorAll(".slider");
+
+tableElements.forEach(function (element) {
+  element.addEventListener(
+    "updateFilters",
+    (e) => {
+      console.log(e.detail);
+      console.log(img)
+      img.style.setProperty("--hue", e.detail.hue);
+      img.style.setProperty("--saturation", e.detail.saturation);
+      img.style.setProperty("--brightness", e.detail.brightness);
+      img.style.setProperty("--contrast", e.detail.contrast);
+    },
+    false
+  );
+});
