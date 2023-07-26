@@ -1,6 +1,6 @@
 #myImg {
-  filter: hue-rotate(--hue)
-  saturate(--saturation)
-  brightness(--brightness)
-  contrast(--contrast);
+  filter: hue-rotate(var(--hue))
+  saturate(var(--saturation))
+  brightness(var(--brightness))
+  contrast(var(--contrast));
 }
